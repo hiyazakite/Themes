@@ -195,7 +195,22 @@ function symlink(done) {
         handleError(done('Required parameters [--theme, --site] missing!'));
     }
 
-    exec(`ln -sfn ${__dirname}/packages/${argv.theme} ${argv.site}/content/themes`);
+    const themePath = `${__dirname}/packages/${argv.theme}`;
+    const sitePath = argv.site ? `${argv.site}/content/themes` : `${__dirname}/docker/ghost/current/content/themes`;
+
+    exec(`ln -sfn ${themePath} ${sitePath}`);
+    done();
+}
+
+function copy(done) {
+    if (!argv.theme) {
+        handleError(done('Required parameters [--theme, --site] missing!'));
+    }
+
+    const themePath = `${__dirname}/packages/${argv.theme}`;
+    const sitePath = argv.site ? `${argv.site}/content/themes` : `${__dirname}/docker/ghost/current/content/themes`;
+
+    exec(`cp -r ${themePath} ${sitePath}`);
     done();
 }
 
@@ -265,6 +280,7 @@ function zipper(done) {
 }
 
 exports.symlink = symlink;
+exports.copy = series(build, copy);
 exports.test = test;
 exports.testCI = testCI;
 exports.zip = series(build, zipper);
